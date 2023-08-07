@@ -1,0 +1,92 @@
+{% extends 'base.html' %} {% block title %}Update task{% endblock %} {% block
+content %}
+
+<div class="container">
+  <form
+    class="row gy-2 gx-3 align-items-center"
+    action="/database_update/{{event_to_update.id}}"
+    method="POST"
+  >
+    <table class="table table-bordered table-sm">
+      <thead>
+        <tr>
+          <th
+            data-field="Identifier"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            Relay ID
+          </th>
+          <th
+            data-field="Kategoria"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            GPIO Pin
+          </th>
+          <th
+            data-field="Opis"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            Czas trwania [s]
+          </th>
+          <th
+            data-field="Wstawil"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            Ustaw dostepnosc
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <input name="id" value="{{ event_to_update.id }}" />
+          </td>
+          <td>
+            <select
+              class="form-select form-select"
+              id="gpio_pin_number"
+              name="gpio_pin_number"
+            >
+              <option selected>{{event_to_update.pin}}</option>
+              <!--<option>29</option>
+              <option>36</option>
+              <option>21</option>--></select
+            ><br />
+          </td>
+          <td style="padding-inline: 10px; text-align: center; width: 50%">
+            <input
+              class="form-control"
+              type="text"
+              id="duration_time"
+              name="duration_time"
+              style="width: 100%"
+              value="{{event_to_update.duration}}"
+            />
+          </td>
+          <td>
+            <div class="form-floating" style="width: 180pt">
+              <select
+                class="form-select"
+                id="is_enable"
+                name="is_enable"
+                aria-label="Floating label select example"
+                required
+              >
+                <option selected>{{event_to_update.active}}</option>
+                <option>1</option>
+                <option>0</option>
+              </select>
+              <label for="is_enable">Aktualny stan:</label>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <input class="btn btn-primary" type="submit" value="Update" />
+  </form>
+</div>
+{% endblock %}

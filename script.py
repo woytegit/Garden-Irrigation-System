@@ -169,7 +169,7 @@ if __name__ == "__main__":
         update_relay_status(4, True)  # Set relay with ID 4 as active
         update_relay_status(5, False)  # Set relay with ID 5 as active
         update_relay_status(6, True)  # Set relay with ID 6 as active
-    # update_relay_status(3, False)  # Set relay with ID 3 as active
+    update_relay_status(3, True)  # Set relay with ID 3 as active
     # update_relay_duration(1, 12)
 
     # Call the function with the time delay (300 seconds in this example)
