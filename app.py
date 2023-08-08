@@ -5,10 +5,18 @@ from flask import Flask, request, render_template, url_for, redirect, request, f
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import immediateload
 from sqlalchemy.sql import text
+from sqlalchemy.sql.expression import distinct
 from datetime import date, datetime
 import subprocess
+import os
+import sys
+import signal
+from gpiozero import OutputDevice
 
-from sqlalchemy.sql.expression import distinct
+# It is just for similation without RPI connected
+# to delete after test or on the device
+from gpiozero.pins.mock import MockFactory
+from gpiozero import Device  # to delete after test/on device
 
 # import pymysql
 # from flask_bootstrap import Bootstrap
@@ -41,6 +49,9 @@ db = SQLAlchemy(app)
 # NOTHING BELOW THIS LINE NEEDS TO CHANGE
 # this route will test the database connection and nothing more
 
+# Global variable to store the process running the external script
+script_process = None
+
 # classes
 
 
@@ -57,94 +68,13 @@ class RelayDB(db.Model):
         self.duration_time = duration
         self.is_active = active
 
-
-# class Pracownicy(db.Model):
-#     __tablename__ = 'Pracownicy'
-#     id = db.Column(db.Integer, primary_key=True)
-#     imie = db.Column(db.String)
-#     nazwisko = db.Column(db.String)
-#     stanowisko = db.Column(db.String)
-#     uprawnienia = db.Column(db.Integer)
-
-#     def __init__(self, imie, nazwisko, stanowisko, uprawnienia):
-#         self.id = None
-#         self.imie = imie
-#         self.nazwisko = nazwisko
-#         self.stanowisko = stanowisko
-#         self.uprawnienia = uprawnienia
-
-
-# class Kategorie_zadan(db.Model):
-#     __tablename__ = 'Kategorie_zadan'
-#     id = db.Column(db.Integer, primary_key=True)
-#     nazwa = db.Column(db.String)
-
-#     def __init__(self, nazwa):
-#         self.id = None
-#         self.nazwa = nazwa
-
-
-# class Stanowiska(db.Model):
-#     __tablename__ = 'Stanowiska'
-#     id = db.Column(db.Integer, primary_key=True)
-#     nazwa = db.Column(db.String)
-
-#     def __init__(self, nazwa):
-#         self.id = None
-#         self.nazwa = nazwa
-
-
-# class Uprawnienia(db.Model):
-#     __tablename__ = 'Uprawnienia'
-#     id = db.Column(db.Integer, primary_key=True)
-#     nazwa = db.Column(db.String)
-
-#     def __init__(self, nazwa):
-#         self.id = None
-#         self.nazwa = nazwa
-
-# functions
-
-
-# def load_all_task_categories():
-#     categories_temp = Kategorie_zadan.query.order_by(
-#         Kategorie_zadan.nazwa).all()
-#     for item in categories_temp:
-#         task_categories[item.id] = item.nazwa
-#     return task_categories
-
-
-# def load_all_workers():
-#     workers_temp = Pracownicy.query.order_by(Pracownicy.nazwisko).all()
-#     for person in workers_temp:
-#         workers_dict[person.id] = {'imie': person.imie, 'nazwisko': person.nazwisko,
-#                                    'stanowisko': person.stanowisko, 'uprawienia': person.uprawnienia}
-#     return workers_dict
-
-
-# def setup_filter_lists():
-#     kalendarz = Kalendarz.query.all()
-#     for item in kalendarz:
-#         if item.kategoria not in category_list:
-#             category_list.append(item.kategoria)
-#         if item.wstawil not in moder_guy:
-#             moder_guy.append(item.wstawil)
-#     category_list.sort()
-#     moder_guy.sort()
-
-
 ################################################
 # routes
 
+
 @app.route('/')
 def homepage():
-    # if not len(task_categories):
-    # setup_filter_lists()
-    # task_categories = load_all_task_categories()
-    # print(load_all_task_categories())
-    # print(load_all_workers())
     print('Lists updated')
-    # print(task_categories)
     return redirect('/database')
 
 
@@ -152,8 +82,8 @@ def homepage():
 def testdb():
     print(request.method)
     try:
-        kalendarz = RelayDB.query.all()
-        return render_template('database.html',  output_data=kalendarz)
+        relaysData = RelayDB.query.all()
+        return render_template('database.html',  output_data=relaysData)
 
     except Exception as e:
         # e holds description of the error
@@ -186,14 +116,54 @@ def update(id):
         return render_template("database_update.html", event_to_update=event_to_update)
 
 
-@app.route('/run_external_script')
-def add_event_form():  # def run_external_script():
-    try:
-        # Replace "your_script.py" with the path to your external script
-        subprocess.run(['python', 'script.py'], check=True)
-        return 'External script executed successfully.'
-    except subprocess.CalledProcessError as e:
-        return f'Error: {e}'
+@app.route('/start_script')
+def start_script():
+    global script_process
+
+    # Check if the script is already running
+    if script_process is not None and script_process.poll() is None:
+        return "The script is already running."
+
+    # # Replace "script.py" with the path to your external script UNIX
+    # script_process = subprocess.Popen(
+    #     ['python', 'script.py'], preexec_fn=os.setsid)
+
+    # Replace "script.py" with the path to your external script Windows
+    script_process = subprocess.Popen(
+        [sys.executable, 'script.py'], creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+
+    return "External script started."
+
+
+@app.route('/stop_script')
+def stop_script():
+    global script_process
+
+    # Check if the script is running
+    if script_process is None or script_process.poll() is not None:
+        return "The script is not running."
+
+    # # Stop the script process UNIX
+    # os.killpg(os.getpgid(script_process.pid), signal.SIGTERM)
+    # script_process = None
+
+    # Stop the script process Windows
+    script_process.terminate()
+    script_process = None
+
+    Device.pin_factory = MockFactory()  # to delete after tests or on the device
+    relaysToTerminate = RelayDB.query.all()
+    for relayToStop in relaysToTerminate:
+        # Function that turns of all relays after termination the script
+        # OutputDevice(relayToStop.pin)
+        # Part bellow should be deleted after tests/or commented when the code will be on a RPI
+        temp = OutputDevice(relayToStop.pin)
+        temp.on()
+        print(temp.value)
+        temp.off()
+        print(temp.value)
+
+    return "External script stopped."
 
 
 @app.route("/database_delete/<int:id>")

@@ -42,8 +42,8 @@ content %}
       </thead>
       <tbody>
         <tr>
-          <td>
-            <input name="id" value="{{ event_to_update.id }}" />
+          <td style="padding-inline: 5px; text-align: center; width: 5%">
+            <label class="form-control" name="RelayID"> {{ event_to_update.id }} </label>
           </td>
           <td>
             <select
@@ -52,9 +52,7 @@ content %}
               name="gpio_pin_number"
             >
               <option selected>{{event_to_update.pin}}</option>
-              <!--<option>29</option>
-              <option>36</option>
-              <option>21</option>--></select
+
             ><br />
           </td>
           <td style="padding-inline: 10px; text-align: center; width: 50%">
@@ -77,8 +75,8 @@ content %}
                 required
               >
                 <option selected>{{event_to_update.active}}</option>
-                <option>1</option>
-                <option>0</option>
+                <option value="1">True</option>
+                <option value="0">False</option>
               </select>
               <label for="is_enable">Aktualny stan:</label>
             </div>

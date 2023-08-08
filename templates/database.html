@@ -1,59 +1,86 @@
-{% extends 'base.html' %}
-{% block title %}Irrigation system{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Irrigation system{% endblock %} {%
+block content %}
 <div class="container">
-    <br>
-    <div class="container">
-        <p>
-            <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button"
-                aria-expanded="false" aria-controls="collapseExample">
-                Filtry
-            </a>
-        </p>
-        </form>
-        <table class="table table-bordered table-sm">
-            <thead class="table-light">
-                <tr>
-                    <th class="align-middle text-center" data-field="ID" data-filter-control="input"
-                        data-sortable="true">
-                        Strefa nawadniania
-                    </th>
-                    <th class="align-middle text-center" data-field="Data" data-filter-control="select"
-                        data-sortable="true">
-                        RPI Pin
-                    </th>
-                    <th class="align-middle text-center" data-field="Kategoria" data-filter-control="select"
-                        data-sortable="true">
-                        Czas trwania [s]
-                    </th>
-                    <th class="align-middle text-center" data-field="Opis" data-filter-control="select"
-                        data-sortable="true">
-                        Dostepny
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in output_data %}
-                <tr>
-                    <td class="align-middle">{{row.id}}</td>
-                    <td class="align-middle">{{row.pin}}</td>
-                    <td class="align-middle">{{row.duration}}</td>
-                    <td class="align-middle">{{row.active}}</td>
-                    <!-- <td class="align-middle">{{row.wstawil}}</td>-->
-                    <!-- <td class="align-middle">{{row.last_update}}</td>-->
-                    <td>
-                        <a class="btn btn-primary btn-sm" href="/database_update/{{row.id}}"> Edytuj</a>
-                        <a class="btn btn-danger btn-sm" href="/database_delete/{{row.id}}"> Usuń</a>
-                    </td>
-                </tr>
-                {% endfor %}
-                <!-- Because it is flask framework there would be other keywords like 'endfor'   -->
-            </tbody>
-        </table>
-    </div>
+  <br />
+  <div class="container">
+    <p>
+      <a
+        class="btn btn-primary"
+        data-bs-toggle="collapse"
+        href="#collapseExample"
+        role="button"
+        aria-expanded="false"
+        aria-controls="collapseExample"
+      >
+        Filtry
+      </a>
+    </p>
 
-    <a class="btn btn-success" href='/run_external_script'>Uruchom podlewanie</a>
+    <table class="table table-bordered table-sm">
+      <thead class="table-light">
+        <tr>
+          <th
+            class="align-middle text-center"
+            data-field="RelayID"
+            data-filter-control="input"
+            data-sortable="true"
+          >
+            Strefa nawadniania
+          </th>
+          <th
+            class="align-middle text-center"
+            data-field="GPIO_pin"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            RPI Pin
+          </th>
+          <th
+            class="align-middle text-center"
+            data-field="Kategoria"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            Czas trwania [s]
+          </th>
+          <th
+            class="align-middle text-center"
+            data-field="Opis"
+            data-filter-control="select"
+            data-sortable="true"
+          >
+            Dostepny
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in output_data %}
+        <tr>
+          <td class="align-middle">{{row.id}}</td>
+          <td class="align-middle">{{row.pin}}</td>
+          <td class="align-middle">{{row.duration}}</td>
+          <td class="align-middle">{{row.active}}</td>
+          <!-- <td class="align-middle">{{row.wstawil}}</td>-->
+          <!-- <td class="align-middle">{{row.last_update}}</td>-->
+          <td>
+            <a
+              class="btn btn-primary btn-sm"
+              href="/database_update/{{row.id}}"
+            >
+              Edytuj</a
+            >
+            <a class="btn btn-danger btn-sm" href="/database_delete/{{row.id}}">
+              Usuń</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+        <!-- Because it is flask framework there would be other keywords like 'endfor'   -->
+      </tbody>
+    </table>
+  </div>
 
+  <a class="btn btn-success" href="/start_script">Uruchom podlewanie</a>
+  <a class="btn btn-danger" href="/stop_script">Zakończ podlewanie</a>
 </div>
 {% endblock %}

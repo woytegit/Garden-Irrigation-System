@@ -173,7 +173,7 @@ if __name__ == "__main__":
     # update_relay_duration(1, 12)
 
     # Call the function with the time delay (300 seconds in this example)
-    warning_issued = save_timestamp_to_db(timeDelay=300, manual=False)
+    warning_issued = save_timestamp_to_db(timeDelay=60, manual=False)
     # Call the function to execute watering stuff
     if not warning_issued:
         all_relays = get_all_relays()
