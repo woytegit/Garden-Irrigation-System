@@ -11,27 +11,11 @@ import subprocess
 import os
 import sys
 import signal
-from gpiozero import OutputDevice
 
-# It is just for similation without RPI connected
-# to delete after test or on the device
-from gpiozero.pins.mock import MockFactory
-from gpiozero import Device  # to delete after test/on device
-
-# import pymysql
-# from flask_bootstrap import Bootstrap
-# from flask_wtf import FlaskForm
-# from wtforms import SubmitField, SelectField, RadioField, HiddenField, StringField, IntegerField, FloatField, DateField
-# from wtforms.validators import InputRequired, Length, Regexp, NumberRange
-
+# Only import on RPi
+# import RPi.GPIO as GPIO
 
 app = Flask(__name__)
-
-# Flask-WTF requires an enryption key - the string can be anything
-# app.config['SECRET_KEY'] = 'MLXH243GssUWwKdTWS7FDhdwYF56wPj8'
-
-# Flask-Bootstrap requires this line
-# Bootstrap(app)
 
 # the name of the database; add path if necessary
 db_name = 'garden_data.db'
@@ -151,17 +135,21 @@ def stop_script():
     script_process.terminate()
     script_process = None
 
-    Device.pin_factory = MockFactory()  # to delete after tests or on the device
+    # GPIO.setmode(GPIO.BMC)
     relaysToTerminate = RelayDB.query.all()
+    print("Script has been stopped manually")
     for relayToStop in relaysToTerminate:
         # Function that turns of all relays after termination the script
-        # OutputDevice(relayToStop.pin)
-        # Part bellow should be deleted after tests/or commented when the code will be on a RPI
-        temp = OutputDevice(relayToStop.pin)
-        temp.on()
-        print(temp.value)
-        temp.off()
-        print(temp.value)
+
+        # GPIO.setup(relayToStop.pin, GPIO.OUT)
+        print("GPIO.setup(relayToStop.pin, GPIO.OUT)")
+        # GPIO.output(relayToStop.pin, GPIO.LOW)
+        print("GPIO.output(relayToStop.pin, GPIO.LOW)")
+        print(
+            f"Relay no.{relayToStop.id} is deactived with status GPIO.input(relayToStop.pin)")
+
+    # GPIO.cleanup()
+    print("GPIO.cleanup()")
 
     return "External script stopped."
 

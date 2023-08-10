@@ -1,9 +1,9 @@
-from gpiozero import OutputDevice
-from gpiozero.pins.mock import MockFactory  # It is just for similation
-from gpiozero import Device
 import time
 import datetime
 import sqlite3
+
+# Only import on RPi
+# import RPi.GPIO as GPIO
 
 # Function to create the database and table of timestamps (execute only once to set up the database)
 
@@ -127,14 +127,23 @@ def save_timestamp_to_db(timeDelay, manual):
 
 
 def runSystem(relaysTable):
+    # GPIO.setmode(GPIO.BOARD)
+    # GPIO.setmode(GPIO.BCM)
+    print("GPIO.setmode(GPIO.BCM)")
     for relay in relaysTable:
         if relay[3]:
-            temp = OutputDevice(relay[1])
-            temp.on()
+            # GPIO.setup(relay[1], GPIO.OUT)
+            print(f"GPIO.setup({relay[1]}, GPIO.OUT)")
+            # GPIO.output(relay[1], GPIO.HIGH)
+            print(f"GPIO.output({relay[1]}, GPIO.HIGH)")
             print(
-                f"Relay no.{relay[0]} is active by {relay[2]} seconds with status {temp.value}")
+                f"Relay no.{relay[0]} is active for {relay[2]} seconds with status GPIO.input(relay[1])")
             time.sleep(relay[2])
-            temp.off()
+            # GPIO.output(relay[1], GPIO.LOW)
+            print(f"GPIO.output({relay[1]}, GPIO.LOW)")
+            print("====================")
+    # GPIO.cleanup()
+    print("GPIO.cleanup()")
 
 
 def setupParameters():
@@ -149,8 +158,6 @@ def setupParameters():
 
 # Example usage:
 if __name__ == "__main__":
-    # Set the pin factory to use the custom mock pin implementation
-    Device.pin_factory = MockFactory()
 
     # Create the table (execute only once to set up the database)
     create_relays_table()
@@ -169,11 +176,12 @@ if __name__ == "__main__":
         update_relay_status(4, True)  # Set relay with ID 4 as active
         update_relay_status(5, False)  # Set relay with ID 5 as active
         update_relay_status(6, True)  # Set relay with ID 6 as active
-    update_relay_status(3, True)  # Set relay with ID 3 as active
+    # update_relay_status(3, True)  # Set relay with ID 3 as active
     # update_relay_duration(1, 12)
 
     # Call the function with the time delay (300 seconds in this example)
     warning_issued = save_timestamp_to_db(timeDelay=60, manual=False)
+    warning_issued = False
     # Call the function to execute watering stuff
     if not warning_issued:
         all_relays = get_all_relays()
